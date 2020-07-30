@@ -1,5 +1,5 @@
 # chook
-A new approach to hook C functions by using dyld info.
+A new approach to hook C functions in lazy symbol by using dyld info.
 
 # Usage
 ```c
@@ -13,29 +13,42 @@ char* my_getenv(const char *s)
     return ori_getenv(s);
 }
 
-void func(const struct mach_header *header, intptr_t slide)
+void c_hook_func(const struct mach_header *header, intptr_t slide)
 {
     c_hook(header, slide, "getenv", my_getenv, (void *)&ori_getenv);
 }
 
+void reset_c_hook_func(const struct mach_header *header, intptr_t slide)
+{
+    reset_c_hook(header, slide, "getenv");
+}
+
 int main(int argc, char * argv[])
 {
-    _dyld_register_func_for_add_image(func);
+    _dyld_register_func_for_add_image(c_hook_func);
+
+    printf("path = %s\n", getenv("PATH"));
+
+    _dyld_register_func_for_add_image(reset_c_hook_func);
 
     printf("path = %s\n", getenv("PATH"));
 }
 
 // output
 // 🚀 chook bigo!
-// path = /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/usr/sbin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/sbin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/usr/local/bin
-// 🚀 chook bigo!
-// ...
+// path = path = /usr/bin:/bin:/usr/sbin:/sbin
+// path = path = /usr/bin:/bin:/usr/sbin:/sbin
 ```
 
 # How it works
+## hook C functions
 ![chook.png](./chook.png)
 
+## reset hooked C functions
+![chook.png](./reset_chook.png)
+
 # TODO
-- [ ] **(WIP)anti hook C functions**.
+- [x] reset hooked C functions.
+- [ ] support hook C functions in non-lazy symbol.
 - [ ] support more simple function.
 - [ ] support hook multiple C functions in one line call.
