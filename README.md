@@ -50,5 +50,5 @@ int main(int argc, char * argv[])
 # TODO
 - [x] reset hooked C functions.
 - [ ] support hook C functions in non-lazy symbol.
-- [ ] support more simple function.
+- [ ] support more simple API.
 - [ ] support hook multiple C functions in one line call.
