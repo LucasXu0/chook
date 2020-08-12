@@ -73,10 +73,10 @@ void c_hook(const struct mach_header* header, intptr_t slide, const char *name, 
         switch (opcode) {
             case BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB:
                 seg_index = immediate;
-                offset = _read_uleb128(&begin);
+                offset = _read_uleb128(&begin); // todo: optimize this code, we don't need to read the real uleb128 value immediately.
                 break;
             case BIND_OPCODE_SET_SYMBOL_TRAILING_FLAGS_IMM:
-                done = strcmp(name, (char *)begin + 1) == 0;
+                done = strcmp(name, (char *)begin + 1) == 0; // todo: just use one loop.
                 begin += strlen((char *)begin);
                 break;
             case BIND_OPCODE_SET_DYLIB_ORDINAL_IMM:
