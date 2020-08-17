@@ -1,7 +1,8 @@
 # chook
-A new approach to hook C functions in lazy symbol by using dyld info.
+A new approach to hook lazy binding functions by using dyld info.
 
 # Usage
+## Objective-C or C
 ```c
 #include "simple_chook.h"
 
@@ -40,15 +41,43 @@ int main(int argc, char * argv[])
 // path = path = /usr/bin:/bin:/usr/sbin:/sbin
 ```
 
+## Swift
+```swift
+import Foundation
+
+//_$sSa6appendyyxnF
+
+typealias AppendType = @convention(c) (__owned Int) -> Void
+var myAppend: AppendType = { e in
+    print("🚀 bigo!")
+}
+var replacement = unsafeBitCast(myAppend, to: UnsafeMutableRawPointer.self)
+var replaced: UnsafeMutableRawPointer?
+
+var arr = [1]
+
+arr.append(2)
+
+_dyld_register_func_for_add_image { (header, slide) in
+    c_hook(header, slide, "$sSa6appendyyxnF", replacement, &replaced)
+}
+
+arr.append(3)
+
+// output
+// 🚀 bigo!
+```
+
 # How it works
-## hook C functions
+## hook lazy binding function
 ![chook.png](./chook.png)
 
-## reset hooked C functions
+## reset lazying bound function
 ![chook.png](./reset_chook.png)
 
 # TODO
 - [x] reset hooked C functions.
+- [ ] support Swift completely.
 - [ ] support hook C functions in non-lazy symbol.
 - [ ] support more simple API.
 - [ ] support hook multiple C functions in one line call.
